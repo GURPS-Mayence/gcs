@@ -2423,7 +2423,7 @@
 	<advantage version="2">
 		<name>Curious</name>
 		<type>Mental</type>
-		<base_points>-5</base_points>
+		<base_points>-10</base_points>
 		<cr>12</cr>
 		<reference>B129</reference>
 		<categories>

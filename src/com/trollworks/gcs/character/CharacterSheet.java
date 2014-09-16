@@ -187,7 +187,7 @@ public class CharacterSheet extends JPanel implements ChangeListener, Scrollable
 		if (!GraphicsUtilities.inHeadlessPrintMode()) {
 			setDropTarget(new DropTarget(this, this));
 		}
-		Preferences.getInstance().getNotifier().add(this, SheetPreferences.OPTIONAL_DICE_RULES_PREF_KEY, Fonts.FONT_NOTIFICATION_KEY, SheetPreferences.WEIGHT_UNITS_PREF_KEY);
+		Preferences.getInstance().getNotifier().add(this, SheetPreferences.OPTIONAL_DICE_RULES_PREF_KEY, Fonts.FONT_NOTIFICATION_KEY, SheetPreferences.WEIGHT_UNITS_PREF_KEY, SheetPreferences.DECIMALS_PREF_KEY, SheetPreferences.ATTRIBUTE_MODES_PREF_KEY);
 	}
 
 	/** Call when the sheet is no longer in use. */
@@ -642,8 +642,11 @@ public class CharacterSheet extends JPanel implements ChangeListener, Scrollable
 
 	@Override
 	public void handleNotification(Object producer, String type, Object data) {
-		if (SheetPreferences.OPTIONAL_DICE_RULES_PREF_KEY.equals(type) || Fonts.FONT_NOTIFICATION_KEY.equals(type) || SheetPreferences.WEIGHT_UNITS_PREF_KEY.equals(type)) {
-			markForRebuild();
+		if (SheetPreferences.ATTRIBUTE_MODES_PREF_KEY.equals(type)) {
+			mCharacter.calculateAll();
+		}
+		if (SheetPreferences.OPTIONAL_DICE_RULES_PREF_KEY.equals(type) || Fonts.FONT_NOTIFICATION_KEY.equals(type) || SheetPreferences.WEIGHT_UNITS_PREF_KEY.equals(type) || SheetPreferences.DECIMALS_PREF_KEY.equals(type) || SheetPreferences.ATTRIBUTE_MODES_PREF_KEY.equals(type)) {
+			markForRebuild();	
 		} else {
 			if (type.startsWith(Advantage.PREFIX)) {
 				OutlineSyncer.add(mAdvantageOutline);
@@ -1136,6 +1139,10 @@ public class CharacterSheet extends JPanel implements ChangeListener, Scrollable
 			writeXMLText(out, Numbers.format(mCharacter.getWill()));
 		} else if (key.equals("FRIGHT_CHECK")) { //$NON-NLS-1$
 			writeXMLText(out, Numbers.format(mCharacter.getFrightCheck()));
+		} else if (key.equals("CONSCIOUS_CHECK")) { //$NON-NLS-1$
+			writeXMLText(out, Numbers.format(mCharacter.getConsciousCheck()));
+		} else if (key.equals("DEATH_CHECK")) { //$NON-NLS-1$
+			writeXMLText(out, Numbers.format(mCharacter.getDeathCheck()));
 		} else if (key.equals("BASIC_SPEED")) { //$NON-NLS-1$
 			writeXMLText(out, Numbers.format(mCharacter.getBasicSpeed()));
 		} else if (key.equals("BASIC_MOVE")) { //$NON-NLS-1$

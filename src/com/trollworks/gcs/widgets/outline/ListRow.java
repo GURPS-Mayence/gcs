@@ -22,8 +22,10 @@ import com.trollworks.gcs.feature.SkillBonus;
 import com.trollworks.gcs.feature.SpellBonus;
 import com.trollworks.gcs.feature.WeaponBonus;
 import com.trollworks.gcs.prereq.PrereqList;
+import com.trollworks.gcs.prereq.SpellPrereq;
 import com.trollworks.gcs.skill.SkillDefault;
 import com.trollworks.gcs.skill.Technique;
+import com.trollworks.gcs.spell.Spell;
 import com.trollworks.gcs.template.Template;
 import com.trollworks.toolkit.io.xml.XMLNodeType;
 import com.trollworks.toolkit.io.xml.XMLReader;
@@ -41,6 +43,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -59,6 +62,12 @@ public abstract class ListRow extends Row {
 	private String					mUnsatisfiedReason;
 	private String					mNotes;
 	private TreeSet<String>			mCategories;
+	
+	/* To check for prerequirement */
+	private List<Spell> markedForSpellName = new LinkedList<>();
+	private List<Spell> markedForSpellAny = new LinkedList<>();
+	private List<Spell> markedForSpellCollege = new LinkedList<>();
+	private List<Spell> markedForSpellCollegeCount = new LinkedList<>();
 
 	/**
 	 * Extracts any "nameable" portions of the buffer and puts their keys into the provided set.
@@ -486,6 +495,31 @@ public abstract class ListRow extends Row {
 	public Set<String> getCategories() {
 		return Collections.unmodifiableSet(mCategories);
 	}
+	
+	/** @param category The category to search for.
+	 @return If the catogories contain the given one. */
+	public boolean hasCategory(String category) {
+		return hasCategory(category, false);
+	}
+	
+	/** @param category The category to search for.
+	 @param ignoreCase If the case should be ignored.
+	 @return If the catogories contain the given one. */
+	public boolean hasCategory(String category, boolean ignoreCase) {
+		if (category == null) {
+			return mCategories.contains(null);
+		}
+		if (ignoreCase) {
+			for (String cat : mCategories) {
+				if (cat.toLowerCase().equals(category.toLowerCase())) {
+					return true;
+				}
+			}
+		} else {
+			return mCategories.contains(category);
+		}
+		return false;
+	}
 
 	/** @return The categories this data row belongs to. */
 	public String getCategoriesAsString() {
@@ -569,6 +603,95 @@ public abstract class ListRow extends Row {
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * @param tag The tag of the mark.
+	 * @param spell The spell this spell could be marked with.
+	 * @param deep If a deep search should be done.
+	 * @returns If this spell is marked with another spell respective to a certain tag
+	 */
+	public boolean isMarkedWith(String tag, Spell spell, boolean deep) {
+		if (SpellPrereq.TAG_NAME.equals(tag)) {
+			if (markedForSpellName.contains(spell)) {
+				return true;
+			}
+			if (deep) {
+				for (Spell s : markedForSpellName) {
+					if (s.isMarkedWith(tag, spell, deep)) {
+						return true;
+					}
+				}
+			}
+		} else if (SpellPrereq.TAG_ANY.equals(tag)) {
+			if (markedForSpellAny.contains(spell)) {
+				return true;
+			}
+			if (deep) {
+				for (Spell s : markedForSpellAny) {
+					if (s.isMarkedWith(tag, spell, deep)) {
+						return true;
+					}
+				}
+			}
+		} else if (SpellPrereq.TAG_COLLEGE.equals(tag)) {
+			if (markedForSpellCollege.contains(spell)) {
+				return true;
+			}
+			if (deep) {
+				for (Spell s : markedForSpellCollege) {
+					if (s.isMarkedWith(tag, spell, deep)) {
+						return true;
+					}
+				}
+			}
+		} else if (SpellPrereq.TAG_COLLEGE_COUNT.equals(tag)) {
+			if (markedForSpellCollegeCount.contains(spell)) {
+				return true;
+			}
+			if (deep) {
+				for (Spell s : markedForSpellCollegeCount) {
+					if (s.isMarkedWith(tag, spell, deep)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Adds a spell mark to this spell.
+	 * @param tag The tag of the mark.
+	 * @param spell The spell this spell should be marked with.
+	 */
+	public void addMark(String tag, Spell spell) {
+		if (SpellPrereq.TAG_NAME.equals(tag)) {
+			markedForSpellName.add(spell); 
+		} else if (SpellPrereq.TAG_ANY.equals(tag)) {
+			markedForSpellAny.add(spell);
+		} else if (SpellPrereq.TAG_COLLEGE.equals(tag)) {
+			markedForSpellCollege.add(spell);
+		} else if (SpellPrereq.TAG_COLLEGE_COUNT.equals(tag)) {
+			markedForSpellCollegeCount.add(spell);
+		}
+	}
+	
+	/**
+	 * Removes a spell mark from this spell, if an appropriate one is present.
+	 * @param tag The tag of the mark.
+	 * @param spell The spell this spell should not be marked with any longer.
+	 */
+	public void removeMark(String tag, Spell spell) {
+		if (SpellPrereq.TAG_NAME.equals(tag)) {
+			markedForSpellName.remove(spell);
+		} else if (SpellPrereq.TAG_ANY.equals(tag)) {
+			markedForSpellAny.remove(spell);
+		} else if (SpellPrereq.TAG_COLLEGE.equals(tag)) {
+			markedForSpellCollege.remove(spell);
+		} else if (SpellPrereq.TAG_COLLEGE_COUNT.equals(tag)) {
+			markedForSpellCollegeCount.remove(spell);
+		}
 	}
 
 	/** @return The defaults for this row. */

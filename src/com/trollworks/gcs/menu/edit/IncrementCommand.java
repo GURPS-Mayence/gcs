@@ -36,7 +36,7 @@ public class IncrementCommand extends Command {
 	public static final IncrementCommand	INSTANCE		= new IncrementCommand();
 
 	private IncrementCommand() {
-		super(INCREMENT, CMD_INCREMENT, KeyEvent.VK_EQUALS);
+		super(INCREMENT, CMD_INCREMENT, KeyEvent.VK_PLUS);
 	}
 
 	@Override

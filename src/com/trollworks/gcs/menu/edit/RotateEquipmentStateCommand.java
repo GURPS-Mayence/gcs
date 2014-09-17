@@ -44,7 +44,7 @@ public class RotateEquipmentStateCommand extends Command {
 	public static final RotateEquipmentStateCommand	INSTANCE					= new RotateEquipmentStateCommand();
 
 	private RotateEquipmentStateCommand() {
-		super(TITLE, CMD_ROTATE_EQUIPMENT_STATE, KeyEvent.VK_QUOTE);
+		super(TITLE, CMD_ROTATE_EQUIPMENT_STATE, KeyEvent.VK_NUMBER_SIGN);
 	}
 
 	@Override
